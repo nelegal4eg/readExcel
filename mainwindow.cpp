@@ -1,5 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+//Подключаем библиотеку для Excel
+#include "xlsxdocument.h"
+//#include "xlsxchartsheet.h"
+//#include "xlsxcellrange.h"
+//#include "xlsxchart.h"
+//#include "xlsxrichstring.h"
+//#include "xlsxworkbook.h"
+using namespace QXlsx;
 
 
 #include <QFileInfo>
@@ -60,44 +68,7 @@ void MainWindow::on_btnFOpen_clicked()
             ui->statusbar->showMessage(filePath);
         }
 
-        QAxObject* excel = new QAxObject("Excel.Application", this);
-        QAxObject* workbooks = excel->querySubObject("Workbooks");//рабочая книга
-        QAxObject* workbook = workbooks->querySubObject("Open(const QString)", filePath);
-        excel->dynamicCall("SetVisible(bool)", false);//видимость документа
-
-        QAxObject* worksheet = workbook->querySubObject("Worksheets(int)", 1);
-
-        //Получаем количество строк и столбцов
-        QAxObject* usedrange = worksheet->querySubObject("UsedRange");
-        QAxObject* rows = usedrange->querySubObject("Rows");
-        QAxObject* columns = usedrange->querySubObject("Columns");
-
-        int intRowStart = usedrange->property("Row").toInt();
-        int intColStart = usedrange->property("Column").toInt();
-        int intCols = columns->property("Count").toInt();
-        int intRows = rows->property("Count").toInt();
-
-        qDebug() << intRows;
-        qDebug() << intCols;
-
-        ui->tableWidget->setColumnCount(intColStart + intCols);
-        ui->tableWidget->setRowCount(intRowStart + intRows);
-
-        //Заполняем таблицу
-        for(int row=0; row < intRows; row++){
-            for(int col = 0; col < intCols; col++){
-                QAxObject* cell = worksheet->querySubObject("Cells(int, int)", row + 1, col +1);
-                QVariant value = cell->dynamicCall("Value()");
-                QTableWidgetItem* item = new QTableWidgetItem(value.toString());
-                ui->tableWidget->setItem(row, col, item);
-            }
-        }
-        //Закрывем файл
-        delete worksheet;
-        workbook->dynamicCall("Close (Boolean)", false);
-        delete workbooks;
-        excel->dynamicCall("Quit (void)");
-        delete excel;
+        QXlsx::Document xlsx;
 }
 //Закрыть приложение кнопкой
 void MainWindow::on_btnClose_clicked(){close();}

@@ -11,7 +11,6 @@
 #include <QString>
 #include <QTime>
 #include <QMessageBox>
-//#include <QtXlsxWtiter>
 
 
 namespace Ui { class MainWindow; }
